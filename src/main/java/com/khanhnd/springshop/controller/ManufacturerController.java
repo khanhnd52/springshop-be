@@ -2,19 +2,21 @@ package com.khanhnd.springshop.controller;
 
 import com.khanhnd.springshop.domain.Manufacturer;
 import com.khanhnd.springshop.dto.ManufacturerDto;
+import com.khanhnd.springshop.exception.FileNotFoundException;
+import com.khanhnd.springshop.exception.FileStorageException;
 import com.khanhnd.springshop.service.FileStorageService;
 import com.khanhnd.springshop.service.ManufacturerService;
 import com.khanhnd.springshop.service.MapValidationErrorService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/manufacturers")
@@ -45,5 +47,27 @@ public class ManufacturerController {
         dto.setLogo(entity.getLogo());
 
         return new ResponseEntity<>(dto, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/logo/{filename:.+}")
+    public ResponseEntity<?> downloadFile(@PathVariable String filename, HttpServletRequest request) {
+        Resource resource = fileStorageService.loadLogoFileAsResource(filename);
+
+        String contentType = null;
+        try {
+            contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
+        }catch (Exception ex) {
+            throw new FileStorageException("Could not determine file type.");
+        }
+
+        if (contentType == null) {
+            contentType = "application/octet-stream";
+        }
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=\""
+                + resource.getFilename() + "\"")
+                .body(resource);
     }
 }

@@ -36,4 +36,6 @@ public class ManufacturerService {
         }
         return manufacturerRepository.save(entity);
     }
+
+
 }
