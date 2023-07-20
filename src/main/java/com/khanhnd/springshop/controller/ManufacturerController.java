@@ -108,4 +108,11 @@ public class ManufacturerController {
         BeanUtils.copyProperties(entity, dto);
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteManufacturer(@PathVariable Long id) {
+        manufacturerService.deleteById(id);
+
+        return new ResponseEntity<>("Category with id " + id + " was deleted", HttpStatus.OK);
+    }
 }

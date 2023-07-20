@@ -56,4 +56,10 @@ public class ManufacturerService {
         }
         return found.get();
     }
+
+    public void deleteById(Long id) {
+        Manufacturer existed = findById(id);
+
+        manufacturerRepository.delete(existed);
+    }
 }
