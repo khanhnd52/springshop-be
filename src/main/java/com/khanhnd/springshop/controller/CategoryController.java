@@ -3,6 +3,7 @@ package com.khanhnd.springshop.controller;
 import com.fasterxml.jackson.databind.util.BeanUtil;
 import com.khanhnd.springshop.domain.Category;
 import com.khanhnd.springshop.dto.CategoryDto;
+import com.khanhnd.springshop.exception.CategoryException;
 import com.khanhnd.springshop.service.CategoryService;
 import com.khanhnd.springshop.service.MapValidationErrorService;
 import jakarta.validation.Valid;
@@ -17,6 +18,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping("/api/v1/categories")
 public class CategoryController {
     @Autowired
@@ -32,6 +34,7 @@ public class CategoryController {
         if (responseEntity != null) {
             return responseEntity;
         }
+
 
         Category entity = new Category();
         BeanUtils.copyProperties(dto, entity);
