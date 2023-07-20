@@ -2,7 +2,6 @@ package com.khanhnd.springshop.controller;
 
 import com.khanhnd.springshop.domain.Manufacturer;
 import com.khanhnd.springshop.dto.ManufacturerDto;
-import com.khanhnd.springshop.exception.FileNotFoundException;
 import com.khanhnd.springshop.exception.FileStorageException;
 import com.khanhnd.springshop.service.FileStorageService;
 import com.khanhnd.springshop.service.ManufacturerService;
@@ -49,6 +48,30 @@ public class ManufacturerController {
         }
 
         Manufacturer entity = manufacturerService.insertManufacturer(dto);
+
+        dto.setId(entity.getId());
+        dto.setLogo(entity.getLogo());
+
+        return new ResponseEntity<>(dto, HttpStatus.CREATED);
+    }
+
+    @PatchMapping(
+            value = "/{id}",
+            consumes = {MediaType.APPLICATION_JSON_VALUE,
+                        MediaType.APPLICATION_FORM_URLENCODED_VALUE,
+                        MediaType.MULTIPART_FORM_DATA_VALUE},
+            produces =  MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> updateManufacturer(
+            @PathVariable Long id,
+            @Valid @ModelAttribute ManufacturerDto dto,
+            BindingResult result) {
+        ResponseEntity<?> responseEntity = mapValidationErrorService.mapValidationFields(result);
+
+        if (responseEntity != null) {
+            return responseEntity;
+        }
+
+        Manufacturer entity = manufacturerService.updateManufacturer(id, dto);
 
         dto.setId(entity.getId());
         dto.setLogo(entity.getLogo());

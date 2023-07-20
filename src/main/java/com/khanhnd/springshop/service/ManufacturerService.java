@@ -40,6 +40,29 @@ public class ManufacturerService {
         return manufacturerRepository.save(entity);
     }
 
+    public Manufacturer updateManufacturer(Long id, ManufacturerDto dto) {
+        var found = manufacturerRepository.findById(id);
+
+        if (found.isEmpty()) {
+            throw new ManufacturerException("Manufacturer not found");
+        }
+
+        Manufacturer entity = found.get();
+        // Giữ nguyên logo nếu không truyền logoFile
+        String oldLogo = entity.getLogo(); // Lưu giữ logo cũ
+        BeanUtils.copyProperties(dto, entity);
+
+        if (dto.getLogoFile() != null) {
+            String filename = fileStorageService.storeLogoFile(dto.getLogoFile());
+
+            entity.setLogo(filename);
+//            dto.setLogoFile(null);
+        } else {
+            entity.setLogo(oldLogo);
+        }
+        return manufacturerRepository.save(entity);
+    }
+
     public List<?> findAll() {
         return manufacturerRepository.findAll();
     }
@@ -62,4 +85,5 @@ public class ManufacturerService {
 
         manufacturerRepository.delete(existed);
     }
+
 }
