@@ -9,14 +9,21 @@ import com.khanhnd.springshop.service.ManufacturerService;
 import com.khanhnd.springshop.service.MapValidationErrorService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/manufacturers")
@@ -36,7 +43,7 @@ public class ManufacturerController {
     produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> createManufacturer(@Valid @ModelAttribute ManufacturerDto dto, BindingResult result) {
         ResponseEntity<?> responseEntity = mapValidationErrorService.mapValidationFields(result);
-        System.out.println("test");
+
         if (responseEntity != null) {
             return responseEntity;
         }
@@ -69,5 +76,36 @@ public class ManufacturerController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=\""
                 + resource.getFilename() + "\"")
                 .body(resource);
+    }
+
+    @GetMapping
+    public ResponseEntity<?> getManufacturers() {
+        var list = manufacturerService.findAll();
+        var newList = list.stream().map(item-> {
+            ManufacturerDto dto = new ManufacturerDto();
+            BeanUtils.copyProperties(item, dto);
+            return dto;
+        }).collect(Collectors.toList());
+        return new ResponseEntity<>(newList, HttpStatus.OK);
+    }
+
+    @GetMapping("/page")
+    public ResponseEntity<?> getManufacturers(
+            @PageableDefault(size = 5, sort = "name",direction = Sort.Direction.ASC)Pageable pageable) {
+        var list = manufacturerService.findAll(pageable);
+        var newList = list.stream().map(item-> {
+            ManufacturerDto dto = new ManufacturerDto();
+            BeanUtils.copyProperties(item, dto);
+            return dto;
+        }).collect(Collectors.toList());
+        return new ResponseEntity<>(newList, HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/get")
+    public ResponseEntity<?> getManufacturer(@PathVariable Long id) {
+        var entity = manufacturerService.findById(id);
+        ManufacturerDto dto = new ManufacturerDto();
+        BeanUtils.copyProperties(entity, dto);
+        return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 }
