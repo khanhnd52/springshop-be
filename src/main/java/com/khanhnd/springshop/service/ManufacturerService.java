@@ -67,6 +67,10 @@ public class ManufacturerService {
         return manufacturerRepository.findAll();
     }
 
+    public Page<Manufacturer> findByName(String name, Pageable pageable) {
+        return manufacturerRepository.findByNameContainsIgnoreCase(name, pageable);
+    }
+
     public Page<Manufacturer> findAll(Pageable pageable) {
         return manufacturerRepository.findAll(pageable);
     }

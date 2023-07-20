@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -25,6 +26,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping("/api/v1/manufacturers")
 public class ManufacturerController {
     @Autowired
@@ -110,6 +112,22 @@ public class ManufacturerController {
             return dto;
         }).collect(Collectors.toList());
         return new ResponseEntity<>(newList, HttpStatus.OK);
+    }
+
+    @GetMapping("/find")
+    public ResponseEntity<?> getManufacturers(@RequestParam("query") String query,
+                                              @PageableDefault(size = 2, sort = "name", direction = Sort.Direction.ASC)
+                                              Pageable pageable) {
+        var list = manufacturerService.findByName(query, pageable);
+        var newList = list.getContent().stream().map(item-> {
+            ManufacturerDto dto = new ManufacturerDto();
+            BeanUtils.copyProperties(item, dto);
+            return dto;
+        }).collect(Collectors.toList());
+
+        var newPage = new PageImpl<ManufacturerDto>(newList, list.getPageable(), list.getTotalPages());
+
+        return new ResponseEntity<>(newPage, HttpStatus.OK);
     }
 
     @GetMapping("/page")
