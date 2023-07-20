@@ -29,4 +29,10 @@ public class CustomResponseEntityExceptionHandler extends ResponseEntityExceptio
 
         return new ResponseEntity<>(exceptionResponse, HttpStatus.BAD_REQUEST);
     }
+    @ExceptionHandler(ManufacturerException.class)
+    public final ResponseEntity<Object> handleManufacturerException(ManufacturerException ex, WebRequest request) {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(ex.getMessage());
+
+        return new ResponseEntity<>(exceptionResponse, HttpStatus.BAD_REQUEST);
+    }
 }
